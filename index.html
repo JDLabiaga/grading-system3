@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grading System v2.0</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <!-- Login Section -->
+    <div id="login-section" class="container">
+        <div class="card">
+            <img src="logo.jpg" alt="Logo" class="login-logo">
+            <h2>Teacher Login</h2>
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <button type="button" onclick="handleLogin()">Login</button>
+            <p id="login-error" style="color: red; margin-top: 10px;"></p>
+        </div>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div id="dashboard-section" class="container" style="display: none;">
+        <nav class="sidebar">
+            <div class="brand">GS v2.0</div>
+            <button onclick="handleLogout()">Logout</button>
+        </nav>
+
+        <main class="content">
+            <header>
+                <h1 id="welcome-text" style="color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Welcome, Teacher</h1>
+                <div class="subject-manager">
+                    <input type="text" id="subject-name" placeholder="New Subject Name (e.g. IT 101)">
+                    <button onclick="addSubject()">+ Add Subject</button>
+                </div>
+            </header>
+
+            <section class="table-container">
+                <table>
+                    <thead>
+                        <tr id="table-header">
+                            <th>Student Name</th>
+                            <!-- Dynamic Subjects column will appear here -->
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    
+                    <!-- THIS IS WHERE SAVED DATA APPEARS -->
+                    <tbody id="records-display"></tbody>
+
+                    <!-- THIS IS WHERE YOU INPUT NEW DATA -->
+                    <tbody id="input-area">
+                        <tr id="input-row">
+                            <td><input type="text" id="new-student-name" placeholder="Student Full Name"></td>
+                            <!-- Dynamic Inputs will appear here -->
+                            <td><button onclick="saveStudent()">Save Record</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
