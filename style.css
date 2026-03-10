@@ -273,3 +273,42 @@ body {
     display: block;
     pointer-events: auto;
 }
+
+/* Table Improvements */
+.student-info { display: flex; flex-direction: column; }
+.student-name { font-weight: 600; color: #333; }
+.student-meta { font-size: 0.75rem; color: #777; }
+
+.table-input {
+    width: 60px;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-align: center;
+    transition: all 0.3s;
+}
+.table-input:focus { border-color: #800000; outline: none; box-shadow: 0 0 5px rgba(128,0,0,0.2); }
+
+/* Badges for GWA */
+.badge { padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
+.badge.pass { background: #d4edda; color: #155724; }
+.badge.fail { background: #f8d7da; color: #721c24; }
+
+/* Grade Inputs in Modal */
+.grade-input-field {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+.grade-input-field input { width: 80px; padding: 6px; border-radius: 5px; border: 1px solid #ccc; }
+
+/* Toast Notifications */
+.toast-notif {
+    position: fixed; bottom: 20px; right: 20px; padding: 12px 24px;
+    border-radius: 8px; color: white; font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: opacity 0.5s; z-index: 9999;
+}
+.toast-notif.success { background: #27ae60; }
+.toast-notif.danger { background: #e74c3c; }
