@@ -24,6 +24,7 @@ function bindEvents() {
     
     $('semester-select').onchange = (e) => {
         currentSemesterId = e.target.value;
+        try { localStorage.setItem('selectedSemesterId', currentSemesterId || ''); } catch(e) { }
         loadDashboard();
     };
 
@@ -71,6 +72,20 @@ function renderSemestersToSelect(data) {
     data?.forEach(sem => {
         select.innerHTML += `<option value="${sem.id}">${sem.name}</option>`;
     });
+    // Restore previously-selected semester from localStorage if present
+    try {
+        const saved = localStorage.getItem('selectedSemesterId');
+        if (saved) {
+            const opt = Array.from(select.options).find(o => o.value === saved);
+            if (opt) {
+                select.value = saved;
+                currentSemesterId = saved;
+                // load dashboard for the restored semester
+                setTimeout(()=>loadDashboard(), 0);
+                return;
+            }
+        }
+    } catch (e) { /* ignore */ }
 }
 
 // Lightweight REST fallback using the anon key when supabase-js fails to attach headers
@@ -290,6 +305,7 @@ async function addSemester() {
             currentSemesterId = data.id;
             const sel = $('semester-select');
             if (sel) sel.value = data.id;
+            try { localStorage.setItem('selectedSemesterId', data.id); } catch(e) { }
             await loadDashboard();
         }
     } catch (err) {
@@ -308,6 +324,7 @@ async function addSemester() {
                     if (created && created[0] && created[0].id) {
                         currentSemesterId = created[0].id;
                         const sel = $('semester-select'); if (sel) sel.value = created[0].id;
+                        try { localStorage.setItem('selectedSemesterId', created[0].id); } catch(e) { }
                         await loadDashboard();
                     }
                     btn.disabled = false;
@@ -406,6 +423,15 @@ function renderSubjectList() {
         return;
     }
     wrapper.innerHTML = '';
+    // Restore selected subject from localStorage if present
+    try {
+        const savedSub = localStorage.getItem('selectedSubjectId');
+        if (savedSub) {
+            const found = subjects.find(x => String(x.id) === String(savedSub));
+            if (found) selectedSubjectId = savedSub;
+        }
+    } catch(e) { }
+
     subjects.forEach(s => {
         const el = document.createElement('div');
         el.className = 'subject-item';
@@ -416,8 +442,13 @@ function renderSubjectList() {
             // highlight
             document.querySelectorAll('.subject-item').forEach(it => it.classList.remove('active'));
             if (selectedSubjectId) el.classList.add('active');
+            try { localStorage.setItem('selectedSubjectId', selectedSubjectId || ''); } catch(e) { }
             renderTable();
         };
+        // mark restored selection
+        try {
+            if (selectedSubjectId && String(s.id) === String(selectedSubjectId)) el.classList.add('active');
+        } catch(e) { }
         wrapper.appendChild(el);
     });
 }
