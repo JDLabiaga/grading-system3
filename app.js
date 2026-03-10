@@ -31,6 +31,7 @@ function bindEvents() {
     $('save-semester-btn').onclick = addSemester;
     $('add-subject-btn').onclick = () => openModal('subject-modal');
     $('save-subject-btn').onclick = addSubject;
+    const addSubjectTop = $('add-subject-top-btn'); if (addSubjectTop) addSubjectTop.onclick = () => openModal('subject-modal');
     // Search & filters
     const search = $('search-input'); if (search) search.oninput = () => renderTable();
     const fy = $('filter-year'); if (fy) fy.onchange = () => renderTable();
@@ -93,7 +94,12 @@ async function loadDashboard() {
     $('empty-state').style.display = 'none';
     const { data: subData } = await db.from('subjects2').select('*').eq('semester_id', currentSemesterId);
     subjects = subData || [];
+    // always show subjects area when a semester is selected
+    const subjSection = $('subjects-section'); if (subjSection) subjSection.style.display = currentSemesterId ? 'block' : 'none';
     renderSubjectList();
+    // show add subject controls
+    const addSubBtn = $('add-subject-btn'); if (addSubBtn) addSubBtn.style.display = currentSemesterId ? 'flex' : 'none';
+    const addTop = $('add-subject-top-btn'); if (addTop) addTop.style.display = currentSemesterId ? 'inline-flex' : 'none';
     
     if (subjects.length === 0) {
         $('no-subjects-state').style.display = 'flex';
@@ -378,12 +384,12 @@ function renderSubjectList() {
     const wrapper = $('subject-list');
     const section = document.getElementById('subjects-section');
     if (!wrapper) return;
+    // show the section even if there are no subjects (so user can add one)
+    if (section) section.style.display = currentSemesterId ? 'block' : 'none';
     if (!subjects || subjects.length === 0) {
-        wrapper.innerHTML = '';
-        if (section) section.style.display = 'none';
+        wrapper.innerHTML = '<div class="subject-empty">No subjects yet. Click Add Subject.</div>';
         return;
     }
-    section.style.display = 'block';
     wrapper.innerHTML = '';
     subjects.forEach(s => {
         const el = document.createElement('div');
