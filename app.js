@@ -436,7 +436,20 @@ async function updateGrade(sid, subid, val) {
 
         // If no row updated, try insert
         const { data: inserted, error: insertErr } = await db.from('grades2').insert([{ student_id: sid, subject_id: subid, score }]).select();
-        if (insertErr) throw insertErr;
+        if (insertErr) {
+            // Handle unique-constraint conflict (Postgres 23505 / HTTP 409) by retrying update
+            const msg = (insertErr.message || '') + ' ' + (insertErr.details || '');
+            if (/23505|duplicate key|already exists|unique constraint/i.test(msg)) {
+                try {
+                    const { data: upd2, error: upd2Err } = await db.from('grades2').update({ score }).match({ student_id: sid, subject_id: subid }).select();
+                    if (upd2Err) throw upd2Err;
+                    if (upd2 && upd2.length) { await loadStudents(); return; }
+                } catch (e2) {
+                    console.error('updateGrade retry update failed after insert conflict', e2);
+                }
+            }
+            throw insertErr;
+        }
         if (inserted && inserted.length) {
             await loadStudents();
             return;
