@@ -209,6 +209,11 @@ body {
 .semester-selector button { flex: 0 0 auto; z-index: 1300; }
 .btn.btn-accent { background: rgba(255,255,255,0.12); color: white; border-radius:8px; padding:6px 8px; }
 
+/* Ensure the closed select shows white text on dark sidebar */
+.semester-selector select { color: var(--white) !important; background: rgba(255,255,255,0.03) !important; }
+.semester-selector select option { color: #111; }
+.semester-selector select::-ms-expand { display: none; }
+
 /* Improve card visuals */
 .card { border-radius: 14px; }
 .chart-card { background: linear-gradient(180deg, #ffffff, #f7fbff); }

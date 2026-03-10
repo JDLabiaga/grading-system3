@@ -426,18 +426,29 @@ async function saveStudent() {
 async function updateGrade(sid, subid, val) {
     const score = val === '' ? null : parseFloat(val);
     try {
-        // Upsert so a grade row is created if it doesn't exist yet
-        const res = await db.from('grades2').upsert([{ student_id: sid, subject_id: subid, score }], { onConflict: ['student_id', 'subject_id'] }).select();
-        if (res.error) {
-            console.error('updateGrade upsert error', res.error);
-            showToast('Failed to save grade', 'danger');
+        // Try update first
+        const { data: updated, error: updateErr } = await db.from('grades2').update({ score }).match({ student_id: sid, subject_id: subid }).select();
+        if (updateErr) throw updateErr;
+        if (updated && updated.length) {
+            await loadStudents();
             return;
         }
+
+        // If no row updated, try insert
+        const { data: inserted, error: insertErr } = await db.from('grades2').insert([{ student_id: sid, subject_id: subid, score }]).select();
+        if (insertErr) throw insertErr;
+        if (inserted && inserted.length) {
+            await loadStudents();
+            return;
+        }
+
+        // If we reach here something unexpected happened
+        console.error('updateGrade: no rows updated or inserted');
+        showToast('Failed to save grade', 'danger');
     } catch (e) {
-        // Fallback to update if upsert not allowed
-        try { await db.from('grades2').update({ score }).match({ student_id: sid, subject_id: subid }); } catch (ee) { console.error('updateGrade failed', ee); }
+        console.error('updateGrade failed', e);
+        showToast('Failed to save grade', 'danger');
     }
-    await loadStudents(); // Refresh average
 }
 
 async function deleteStudent(id) {
