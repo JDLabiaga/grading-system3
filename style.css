@@ -180,3 +180,18 @@ body {
     .main-content { margin-left: 0; }
     .sidebar-open-btn { display: block; }
 }
+
+/* Sidebar overlay (click to close sidebar on mobile) */
+.sidebar-overlay {
+    position: fixed;
+    inset: 0 0 0 0;
+    background: rgba(0,0,0,0.35);
+    display: none;
+    z-index: 85;
+    pointer-events: none;
+}
+/* When sidebar has .open show overlay and allow pointer events */
+.sidebar.open ~ .sidebar-overlay {
+    display: block;
+    pointer-events: auto;
+}
