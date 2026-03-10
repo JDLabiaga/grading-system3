@@ -129,50 +129,36 @@ async function loadDashboard() {
 }
 
 async function loadStudents() {
-    const { data: studentList } = await db.from('students2').select('*').eq('semester_id', currentSemesterId);
-    const { data: gradeData } = await db.from('grades2').select('*').in('student_id', studentList.map(s => s.id));
-    
-    students = studentList.map(s => ({
+    const { data: studentList = [], error: studentErr } = await db.from('students2').select('*').eq('semester_id', currentSemesterId);
+    if (studentErr) {
+        console.error('loadStudents: failed to load students', studentErr);
+        students = [];
+        renderTable();
+        return;
+    }
+
+    let gradeData = [];
+    try {
+        if (studentList.length > 0) {
+            const ids = studentList.map(s => s.id);
+            const res = await db.from('grades2').select('*').in('student_id', ids);
+            gradeData = res.data || [];
+        }
+    } catch (e) {
+        console.warn('loadStudents: failed to load grades', e);
+        gradeData = [];
+    }
+
+    students = (studentList || []).map(s => ({
         ...s,
-        grades: gradeData.filter(g => g.student_id === s.id)
+        grades: (gradeData || []).filter(g => String(g.student_id) === String(s.id))
     }));
     populateFilterOptions();
     renderTable();
     // Update dashboard chart & stats
-    try {
-        const searchVal = $('search-input')?.value?.toLowerCase() || '';
-        const yearFilter = $('filter-year')?.value || '';
-        const sectionFilter = $('filter-section')?.value || '';
-
-        head.innerHTML = '<th>Name</th><th>Year/Sec</th>';
-        subjects.forEach(sub => head.innerHTML += `<th>${sub.name}</th>`);
-        head.innerHTML += '<th>Avg</th><th>Action</th>';
-
-        body.innerHTML = '';
-        students.filter(s => {
-            if (searchVal) {
-                const name = (s.full_name || '').toLowerCase();
-                if (!name.includes(searchVal)) return false;
-            }
-            if (yearFilter && String(s.year_level) !== String(yearFilter)) return false;
-            if (sectionFilter && String(s.section) !== String(sectionFilter)) return false;
-            return true;
-        }).forEach(s => {
-        });
-        const totalStudents = students.length;
-        const classAvg = totalStudents ? (studentAverages.reduce((a,b)=>a+b,0)/totalStudents).toFixed(1) : 0;
-        const passCount = studentAverages.filter(a => a >= 75).length;
-        const passRate = totalStudents ? Math.round((passCount / totalStudents) * 100) : 0;
-
-        // Update DOM stats
-        document.getElementById('stat-total-students').textContent = totalStudents;
-        document.getElementById('stat-average-class').textContent = classAvg;
-        document.getElementById('stat-pass-rate').textContent = passRate + '%';
-
-        updateChart(labels, averages);
-    } catch (e) {
-        console.warn('Chart update skipped', e);
-    }
+    // Update filters and render table (renderTable handles table/chart rendering)
+    populateFilterOptions();
+    renderTable();
 
     function populateFilterOptions() {
         const years = Array.from(new Set(students.map(s => s.year_level))).filter(Boolean).sort();
@@ -222,25 +208,72 @@ function updateChart(labels, data) {
 function renderTable() {
     const head = $('table-header');
     const body = $('table-body');
-    
     head.innerHTML = '<th>Name</th><th>Year/Sec</th>';
     subjects.forEach(sub => head.innerHTML += `<th>${sub.name}</th>`);
     head.innerHTML += '<th>Avg</th><th>Action</th>';
-    
+
     body.innerHTML = '';
-    students.forEach(s => {
-        let row = `<tr><td>${s.full_name}</td><td>${s.year_level}-${s.section}</td>`;
+    // Prepare subject averages
+    const subjectSums = subjects.map(() => 0);
+    const subjectCounts = subjects.map(() => 0);
+
+    const visibleStudents = students; // no additional filters here; keep existing filter UI if needed
+
+    visibleStudents.forEach(s => {
+        let row = `<tr><td>${s.full_name}</td><td>${s.year_level || ''}-${s.section || ''}</td>`;
         let total = 0;
-        subjects.forEach(sub => {
-            const grade = s.grades.find(g => g.subject_id === sub.id)?.score || 0;
-            total += grade;
-            row += `<td><input type="number" class="glass-input-table" value="${grade}" onchange="updateGrade(${s.id}, ${sub.id}, this.value)"></td>`;
+        subjects.forEach((sub, idx) => {
+            const g = (s.grades || []).find(g => String(g.subject_id) === String(sub.id));
+            const gradeVal = g && g.score != null ? parseFloat(g.score) : NaN;
+            const display = !isNaN(gradeVal) ? gradeVal : '';
+            if (!isNaN(gradeVal)) {
+                total += gradeVal;
+                subjectSums[idx] += gradeVal;
+                subjectCounts[idx] += 1;
+            }
+            row += `<td><input type="number" step="0.1" class="glass-input-table" value="${display}" onchange="updateGrade('${s.id}', '${sub.id}', this.value)"></td>`;
         });
-        const avg = (total / subjects.length).toFixed(1);
-        row += `<td style="font-weight:bold; color:${avg >= 75 ? 'green':'red'}">${avg}</td>`;
-        row += `<td><button class="btn btn-sm btn-outline" onclick="deleteStudent(${s.id})"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+        const avg = subjects.length ? (total / subjects.length) : 0;
+        const avgDisplay = (Math.round(avg * 10) / 10).toFixed(1);
+        row += `<td style="font-weight:bold; color:${avg >= 75 ? 'green':'red'}">${avgDisplay}</td>`;
+        row += `<td><button class="btn btn-sm btn-outline" onclick="deleteStudent('${s.id}')"><i class="fa-solid fa-trash"></i></button></td></tr>`;
         body.innerHTML += row;
     });
+
+    // Update class stats
+    const totalStudents = students.length;
+    const classAvg = totalStudents ? (students.reduce((acc, st) => {
+        // compute each student's average
+        let stTotal = 0; let stCount = 0;
+        subjects.forEach(sub => {
+            const g = (st.grades || []).find(x => String(x.subject_id) === String(sub.id));
+            const v = g && g.score != null ? parseFloat(g.score) : NaN;
+            if (!isNaN(v)) { stTotal += v; stCount++; }
+        });
+        return acc + (stCount ? stTotal / subjects.length : 0);
+    }, 0) / totalStudents) : 0;
+    const classAvgDisplay = (Math.round(classAvg * 10) / 10).toFixed(1);
+    const passCount = students.filter(st => {
+        // student average
+        let stTotal = 0; let stCount = 0;
+        subjects.forEach(sub => {
+            const g = (st.grades || []).find(x => String(x.subject_id) === String(sub.id));
+            const v = g && g.score != null ? parseFloat(g.score) : NaN;
+            if (!isNaN(v)) { stTotal += v; stCount++; }
+        });
+        const stAvg = stCount ? stTotal / subjects.length : 0;
+        return stAvg >= 75;
+    }).length;
+    const passRate = totalStudents ? Math.round((passCount / totalStudents) * 100) : 0;
+
+    document.getElementById('stat-total-students').textContent = totalStudents;
+    document.getElementById('stat-average-class').textContent = classAvgDisplay;
+    document.getElementById('stat-pass-rate').textContent = passRate + '%';
+
+    // Update chart with subject averages
+    const labels = subjects.map(s => s.name);
+    const averages = subjects.map((s, i) => subjectCounts[i] ? Math.round((subjectSums[i] / subjectCounts[i]) * 10) / 10 : 0);
+    updateChart(labels, averages);
 }
 
 // Helper: Modals
@@ -391,8 +424,15 @@ async function saveStudent() {
 }
 
 async function updateGrade(sid, subid, val) {
-    await db.from('grades2').update({ score: parseFloat(val) }).match({ student_id: sid, subject_id: subid });
-    loadStudents(); // Refresh average
+    const score = val === '' ? null : parseFloat(val);
+    try {
+        // Upsert so a grade row is created if it doesn't exist yet
+        await db.from('grades2').upsert([{ student_id: sid, subject_id: subid, score }], { onConflict: ['student_id', 'subject_id'] });
+    } catch (e) {
+        // Fallback to update if upsert not allowed
+        try { await db.from('grades2').update({ score }).match({ student_id: sid, subject_id: subid }); } catch (ee) { console.error('updateGrade failed', ee); }
+    }
+    await loadStudents(); // Refresh average
 }
 
 async function deleteStudent(id) {
