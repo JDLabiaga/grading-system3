@@ -8,307 +8,94 @@
     --glass-bg: rgba(255, 255, 255, 0.7);
     --glass-border: rgba(255, 255, 255, 0.3);
     --radius: 16px;
-    --radius-sm: 10px;
     --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --sidebar-width: 280px;
     --danger: #e74c3c;
     --success: #27ae60;
-    --font: 'Inter', sans-serif;
-}
-
-@keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
 }
 
 body {
-    font-family: var(--font);
-    color: var(--text);
+    font-family: 'Inter', sans-serif;
     margin: 0;
-    background: linear-gradient(-45deg, #f1f3f5, #e2e8f0, #cbd5e1, #f8f9fa);
-    background-size: 400% 400%;
-    animation: gradientBG 15s ease infinite;
+    background: #f1f3f5;
     min-height: 100vh;
-    overflow-x: hidden;
 }
 
-/* Sidebar */
+/* Sidebar Fixes */
 .sidebar {
     width: var(--sidebar-width);
-    background: linear-gradient(180deg,#17223b 0%, #19273f 100%);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: #17223b;
     color: var(--white);
     position: fixed;
     height: 100vh;
     z-index: 1200;
     display: flex;
     flex-direction: column;
-    transition: transform var(--transition);
 }
 
-.sidebar-header {
-    padding: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-.brand { font-weight: 700; display: flex; align-items: center; gap: 10px; }
-.brand i { color: var(--accent); font-size: 1.5rem; }
-
-/* Main Layout */
-.main-content {
-    margin-left: var(--sidebar-width);
+.sidebar-content {
     flex: 1;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    z-index: 10;
+    overflow-y: auto;
+    padding: 1rem;
 }
 
-.top-bar {
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--glass-border);
-    padding: 1rem 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 90;
-}
-
-/* Dashboard cards */
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 1rem;
-    padding: 1.5rem 2rem;
-}
-.card {
-    background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(245,247,250,0.9));
-    border-radius: 12px;
-    border: 1px solid rgba(16,24,40,0.06);
-    box-shadow: 0 6px 18px rgba(12,20,40,0.06);
-    padding: 0.8rem 1rem;
-    display: flex;
-    flex-direction: column;
-}
-.card-header { margin-bottom: 0.6rem; }
-.card-header h3 { margin: 0; font-size: 1.05rem; }
-.card-sub { color: var(--text-light); font-size: 0.85rem; }
-.card-body { flex: 1; display: flex; align-items: center; justify-content: center; }
-.chart-card .card-body { padding: 0.5rem 0.8rem; }
-.stats-body { display:flex; gap:1rem; justify-content:space-between; width:100%; }
-.stat { text-align: center; flex:1; padding: 0.5rem; }
-.stat-value { font-size: 1.6rem; font-weight:700; color:var(--primary); }
-.stat-label { color:var(--text-light); font-size:0.85rem; }
-
-/* Readability tweaks */
-.card { font-size: 0.98rem; }
-.subject-item { padding: 8px 10px; border-radius: 8px; cursor: pointer; color: #fff; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
-.subject-item i { color: rgba(255,255,255,0.8); }
-.subject-item:hover { background: rgba(255,255,255,0.04); }
-.subject-item.active { background: rgba(255,255,255,0.08); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02); }
-
-.subject-empty { color: rgba(255,255,255,0.6); padding: 8px; font-size: 0.95rem; }
-
-
-/* Table Design */
-.table-wrapper {
-    background: var(--glass-bg);
-    backdrop-filter: blur(10px);
-    border-radius: var(--radius);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--shadow);
-    overflow: auto;
-    margin-top: 1rem;
-}
-
-/* Table header improvements */
-#student-table thead th {
-    background: var(--primary);
-    color: #fff;
-    padding: 14px;
-    border-radius: 8px;
-}
-
-#student-table tbody td { padding: 12px; }
-
-.table-controls { display:flex; gap:1rem; align-items:center; padding: 0.5rem 0; }
-.table-search { flex: 1; display:flex; align-items:center; gap:8px; }
-.table-filters { display:flex; gap:0.5rem; }
-
-.btn-sm { padding:6px 10px; font-size:0.95rem; }
-
-/* Empty state centered */
-.empty-state { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:3rem; color:var(--text-light); }
-
-#student-table { width: 100%; border-collapse: collapse; }
-#student-table th { 
-    background: var(--primary); 
-    color: white; 
-    padding: 12px; 
-    text-align: left; 
-    font-size: 0.8rem; 
-    text-transform: uppercase;
-}
-#student-table td { padding: 12px; border-bottom: 1px solid rgba(0,0,0,0.05); }
-
-/* Inputs */
-.input-group { position: relative; margin-bottom: 1rem; width: 100%; }
-.input-group i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-light); }
-.input-group input, .filter-select {
-    width: 100%;
-    padding: 10px 10px 10px 35px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    outline: none;
-}
-
-/* Fancy select in sidebar */
-#semester-select {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background: rgba(255,255,255,0.06) !important;
-    color: var(--white) !important;
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.08) !important;
-    min-width: 0;
-    width: 100%;
-}
-#semester-select:focus { box-shadow: 0 6px 18px rgba(15,23,42,0.25); }
-
-/* Ensure select text is visible on Windows/Chromium where native rendering can show white bg */
-.semester-selector select { background-clip: padding-box; }
-.semester-selector .btn-accent { background: rgba(255,255,255,0.06); }
-
-/* Small UI polish */
-.sidebar { padding-bottom: 16px; }
-.sidebar .menu-section { padding: 0.8rem 1rem; }
-.content-area { padding: 1rem 2rem 2rem; }
-.table-controls { padding: 0.6rem 1rem; }
-.card { padding: 1rem; }
-.stat-value { color: var(--primary-dark); }
-.glass-input-table { background: rgba(255,255,255,0.9); color: #111; border: 1px solid #e5e7eb; }
-
-/* Improve header contrast for readability */
-#student-table thead th { background: linear-gradient(90deg, var(--primary), var(--primary-dark)); }
-
-.sidebar .menu-label { color: rgba(255,255,255,0.9); font-weight:600; margin-bottom:0.5rem; }
-.semester-selector { display:flex; gap:8px; align-items:center; }
-.semester-selector select { flex: 1; min-width: 0; }
-.semester-selector button { flex: 0 0 auto; z-index: 1300; }
-.btn.btn-accent { background: rgba(255,255,255,0.12); color: white; border-radius:8px; padding:6px 8px; }
-
-/* Ensure the closed select shows white text on dark sidebar */
-.semester-selector select { color: var(--white) !important; background: rgba(255,255,255,0.03) !important; }
-.semester-selector select option { color: #111; }
-.semester-selector select::-ms-expand { display: none; }
-
-/* Improve card visuals */
-.card { border-radius: 14px; }
-.chart-card { background: linear-gradient(180deg, #ffffff, #f7fbff); }
-.stats-card { background: linear-gradient(180deg,#fff7f6,#fff); }
-
-/* Make empty state lighter */
-.empty-state h3 { color: #4b5563; }
-
-.glass-input-table {
-    width: 60px;
-    text-align: center;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background: rgba(255,255,255,0.5);
-}
-
-/* Modals */
+/* Modal Fixes - CRITICAL */
 .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.4);
-    display: none; align-items: center; justify-content: center; z-index: 1000;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: none; /* Controlled by JS */
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
     backdrop-filter: blur(4px);
 }
-.modal-overlay.active { display: flex; }
-.modal { background: white; padding: 2rem; border-radius: var(--radius); width: 90%; max-width: 500px; }
 
-/* Buttons */
-.btn { 
-    padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; 
-    display: inline-flex; align-items: center; gap: 8px; font-weight: 600;
-}
-.btn-primary { background: var(--primary); color: white; }
-.btn-danger { background: var(--danger); color: white; }
-.btn-outline { background: transparent; border: 1px solid #ddd; }
-
-/* Toast */
-#toast-container { position: fixed; top: 20px; right: 20px; z-index: 2000; }
-.toast { background: white; padding: 1rem; border-radius: 8px; box-shadow: var(--shadow); margin-bottom: 10px; border-left: 5px solid var(--primary); }
-
-@media (max-width: 1024px) {
-    .sidebar { transform: translateX(-100%); }
-    .sidebar.open { transform: translateX(0); }
-    .main-content { margin-left: 0; }
-    .sidebar-open-btn { display: block; }
+.modal-overlay.active {
+    display: flex !important;
 }
 
-/* Sidebar overlay (click to close sidebar on mobile) */
-.sidebar-overlay {
-    position: fixed;
-    inset: 0 0 0 0;
-    background: rgba(0,0,0,0.35);
-    display: none;
-    z-index: 85;
-    pointer-events: none;
-}
-/* When sidebar has .open show overlay and allow pointer events */
-.sidebar.open ~ .sidebar-overlay {
-    display: block;
-    pointer-events: auto;
+.modal {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--radius);
+    width: 90%;
+    max-width: 480px;
+    box-shadow: var(--shadow);
 }
 
-/* Table Improvements */
-.student-info { display: flex; flex-direction: column; }
-.student-name { font-weight: 600; color: #333; }
-.student-meta { font-size: 0.75rem; color: #777; }
+/* Table UI */
+.table-wrapper {
+    background: white;
+    border-radius: var(--radius);
+    padding: 1rem;
+    box-shadow: var(--shadow);
+    margin-top: 1rem;
+    overflow-x: auto;
+}
+
+#student-table { width: 100%; border-collapse: collapse; }
+#student-table th { background: var(--primary); color: white; padding: 12px; text-align: left; }
+#student-table td { padding: 12px; border-bottom: 1px solid #eee; }
 
 .table-input {
-    width: 60px;
+    width: 55px;
     padding: 5px;
     border: 1px solid #ddd;
     border-radius: 4px;
     text-align: center;
-    transition: all 0.3s;
 }
-.table-input:focus { border-color: #800000; outline: none; box-shadow: 0 0 5px rgba(128,0,0,0.2); }
 
-/* Badges for GWA */
-.badge { padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
+/* Badge Colors */
+.badge { padding: 4px 10px; border-radius: 20px; font-weight: bold; }
 .badge.pass { background: #d4edda; color: #155724; }
 .badge.fail { background: #f8d7da; color: #721c24; }
 
-/* Grade Inputs in Modal */
-.grade-input-field {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
-}
-.grade-input-field input { width: 80px; padding: 6px; border-radius: 5px; border: 1px solid #ccc; }
+/* Action Buttons */
+.btn-icon { background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 5px; }
+.btn-icon.edit { color: #3498db; }
+.btn-icon.delete { color: var(--danger); }
 
-/* Toast Notifications */
-.toast-notif {
-    position: fixed; bottom: 20px; right: 20px; padding: 12px 24px;
-    border-radius: 8px; color: white; font-weight: 500;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: opacity 0.5s; z-index: 9999;
-}
-.toast-notif.success { background: #27ae60; }
-.toast-notif.danger { background: #e74c3c; }
+.btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-outline { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
