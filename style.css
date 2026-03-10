@@ -177,13 +177,31 @@ body {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
-    color: var(--white);
+    background: rgba(255,255,255,0.06) !important;
+    color: var(--white) !important;
     padding: 8px 12px;
     border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    min-width: 0;
+    width: 100%;
 }
 #semester-select:focus { box-shadow: 0 6px 18px rgba(15,23,42,0.25); }
+
+/* Ensure select text is visible on Windows/Chromium where native rendering can show white bg */
+.semester-selector select { background-clip: padding-box; }
+.semester-selector .btn-accent { background: rgba(255,255,255,0.06); }
+
+/* Small UI polish */
+.sidebar { padding-bottom: 16px; }
+.sidebar .menu-section { padding: 0.8rem 1rem; }
+.content-area { padding: 1rem 2rem 2rem; }
+.table-controls { padding: 0.6rem 1rem; }
+.card { padding: 1rem; }
+.stat-value { color: var(--primary-dark); }
+.glass-input-table { background: rgba(255,255,255,0.9); color: #111; border: 1px solid #e5e7eb; }
+
+/* Improve header contrast for readability */
+#student-table thead th { background: linear-gradient(90deg, var(--primary), var(--primary-dark)); }
 
 .sidebar .menu-label { color: rgba(255,255,255,0.9); font-weight:600; margin-bottom:0.5rem; }
 .semester-selector { display:flex; gap:8px; align-items:center; }

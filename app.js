@@ -411,7 +411,7 @@ async function saveStudent() {
         }]).select().single();
 
         // Add default grades
-        const grades = subjects.map(sub => ({ student_id: data.id, subject_id: sub.id, score: 0 }));
+        const grades = subjects.map(sub => ({ student_id: data.id, subject_id: sub.id, score: null }));
         await db.from('grades2').insert(grades);
 
         closeModal('student-modal');
@@ -427,7 +427,12 @@ async function updateGrade(sid, subid, val) {
     const score = val === '' ? null : parseFloat(val);
     try {
         // Upsert so a grade row is created if it doesn't exist yet
-        await db.from('grades2').upsert([{ student_id: sid, subject_id: subid, score }], { onConflict: ['student_id', 'subject_id'] });
+        const res = await db.from('grades2').upsert([{ student_id: sid, subject_id: subid, score }], { onConflict: ['student_id', 'subject_id'] }).select();
+        if (res.error) {
+            console.error('updateGrade upsert error', res.error);
+            showToast('Failed to save grade', 'danger');
+            return;
+        }
     } catch (e) {
         // Fallback to update if upsert not allowed
         try { await db.from('grades2').update({ score }).match({ student_id: sid, subject_id: subid }); } catch (ee) { console.error('updateGrade failed', ee); }
