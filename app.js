@@ -240,7 +240,19 @@ async function addSemester() {
     if (!name) { showToast('Please enter a semester name','danger'); return; }
     btn.disabled = true;
     try {
-        const { data, error } = await db.from('semesters').insert([{ name }]).select().single();
+        // Ensure we provide a teacher_id if the table requires it (avoid NOT NULL violations)
+        let teacher_id = currentUser?.id;
+        // If currentUser is missing or is placeholder, try to obtain a fallback teacher_id from existing semesters
+        const PLACEHOLDER_ID = '00000000-0000-0000-0000-000000000000';
+        if (!teacher_id || teacher_id === PLACEHOLDER_ID) {
+            try {
+                const { data: oneSem, error: oneErr } = await db.from('semesters').select('teacher_id').limit(1).single();
+                if (!oneErr && oneSem && oneSem.teacher_id) teacher_id = oneSem.teacher_id;
+            } catch (ee) { /* ignore */ }
+        }
+
+        const payload = teacher_id ? { name, teacher_id } : { name };
+        const { data, error } = await db.from('semesters').insert([payload]).select().single();
         if (error) throw error;
         showToast('Semester created', 'success');
         closeModal('semester-modal');
@@ -258,7 +270,8 @@ async function addSemester() {
         // If the error indicates missing API key / 401, attempt REST fallback
         if (err && (err.status === 401 || /No API key/i.test(err.message || ''))) {
             try {
-                const res = await restFetch('/semesters', 'POST', { name });
+                const fallbackPayload = teacher_id ? { name, teacher_id } : { name };
+                const res = await restFetch('/semesters', 'POST', fallbackPayload);
                 if (res.ok) {
                     const created = await res.json();
                     showToast('Semester created (fallback)', 'success');
