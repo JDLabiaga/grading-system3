@@ -232,13 +232,17 @@ function renderTable() {
         const gwa = count > 0 ? (sum / count).toFixed(2) : '0.00';
         const isPass = parseFloat(gwa) > 0 && parseFloat(gwa) <= 3.0;
 
-        return `
-            <tr>
-                <td><strong>${s.full_name}</strong><br><small>${s.year_level || ''} ${s.section || ''}</small></td>
-                ${cells}
-                <td class="text-center"><span class="badge ${isPass ? 'pass' : 'fail'}">${gwa}</span></td>
-                <td class="text-center"><button class="btn-icon" onclick="openEditModal('${s.id}')"><i class="fa-solid fa-ellipsis-vertical"></i></button></td>
-            </tr>`;
+            return `
+                <tr>
+                    <td><strong>${s.full_name}</strong><br><small>${s.year_level || ''} ${s.section || ''}</small></td>
+                    ${cells}
+                    <td class="text-center"><span class="badge ${isPass ? 'pass' : 'fail'}">${gwa}</span></td>
+                    <td class="text-center">
+                        <button class="btn-icon text-danger" onclick="studentToDelete='${s.id}'; openModal('confirm-modal')">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>`;
     }).join('');
 
     updateStats(filtered);
