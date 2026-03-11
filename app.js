@@ -153,56 +153,17 @@ async function saveStudent() {
     }
 }
 
-function openEditModal(id) {
-    const s = students.find(stud => stud.id === id);
-    if (!s) return;
-
-    $('edit-student-id').value = s.id;
-    $('edit-student-name').value = s.full_name;
-    $('edit-student-year').value = s.year_level || '';
-    $('edit-student-section').value = s.section || '';
-
-    $('edit-grade-inputs').innerHTML = subjects.map(sub => {
-        const grade = s.grades.find(g => g.subject_id === sub.id);
-        return `
-            <div class="input-group" style="margin-bottom:10px;">
-                <label style="font-size:0.75rem; color:var(--primary);">${sub.name}</label>
-                <input type="number" step="0.1" class="edit-subject-grade-input glass-input-table" data-subject-id="${sub.id}" value="${grade ? grade.score : ''}" style="width:100%">
-            </div>`;
-    }).join('');
-
-    studentToDelete = s.id;
-    openModal('edit-modal');
-}
-
-async function updateStudent() {
-    const id = $('edit-student-id').value;
-    await db.from('students2').update({
-        full_name: $('edit-student-name').value,
-        year_level: $('edit-student-year').value,
-        section: $('edit-student-section').value
-    }).eq('id', id);
-
-    const inputs = document.querySelectorAll('.edit-subject-grade-input');
-    for (const input of inputs) {
-        const score = input.value === '' ? null : parseFloat(input.value);
-        await db.from('grades2').upsert({
-            student_id: id, subject_id: input.dataset.subjectId, score: score
-        }, { onConflict: 'student_id,subject_id' });
-    }
-
-    closeModal('edit-modal');
-    showToast('Updated', 'success');
-    loadStudents();
-}
+// Set global function for the trash icon in table
+window.setStudentToDelete = (id) => {
+    studentToDelete = id;
+    openModal('confirm-modal');
+};
 
 async function executeDelete() {
     if (!studentToDelete) return;
 
     try {
-        // You only need this one call now! SQL handles the rest.
         const { error } = await db.from('students2').delete().eq('id', studentToDelete);
-
         if (error) throw error;
 
         showToast('Student removed successfully', 'success');
@@ -210,15 +171,15 @@ async function executeDelete() {
         closeModal('edit-modal');
         
         studentToDelete = null; 
-        await loadStudents(); // This refreshes your table and charts
+        await loadStudents(); 
     } catch (err) {
         console.error("Delete Error:", err);
-        showToast('Delete failed. Check connection.', 'danger');
+        showToast('Delete failed', 'danger');
     }
 }
 
-// DELETE SUBJECT
-async function deleteSubject(subjectId) {
+// Global DELETE SUBJECT
+window.deleteSubject = async (subjectId) => {
     if (!confirm("Delete this subject and all associated grades?")) return;
     
     const { error } = await db.from('subjects2').delete().eq('id', subjectId);
@@ -226,12 +187,12 @@ async function deleteSubject(subjectId) {
         showToast("Error deleting subject", "danger");
     } else {
         showToast("Subject deleted", "success");
-        loadDashboard(); // Refresh UI
+        loadDashboard(); 
     }
-}
+};
 
-// DELETE SEMESTER
-async function deleteSemester() {
+// Global DELETE SEMESTER
+window.deleteSemester = async () => {
     if (!currentSemesterId) return;
     const name = $("semester-select").options[$("semester-select").selectedIndex].text;
     
@@ -243,10 +204,10 @@ async function deleteSemester() {
     } else {
         showToast("Semester deleted", "success");
         localStorage.removeItem('selectedSemesterId');
-        location.reload(); // Refresh to clear everything
+        location.reload(); 
     }
-}
-// --- Replace your renderTable function to ensure the button works ---
+};
+
 function renderTable() {
     const searchTerm = $('search-input').value.toLowerCase();
     const year = $('filter-year').value;
@@ -258,13 +219,10 @@ function renderTable() {
         (!sec || s.section === sec)
     );
 
-
-    // Update Header
     $('table-header').innerHTML = '<th>Student Information</th>' + 
         subjects.map(sub => `<th class="text-center">${sub.name}</th>`).join('') + 
         '<th>GWA</th><th>Action</th>';
 
-    // Update Body
     $('table-body').innerHTML = filtered.map(s => {
         let sum = 0, count = 0;
         const cells = subjects.map(sub => {
@@ -283,7 +241,7 @@ function renderTable() {
                 ${cells}
                 <td class="text-center"><span class="badge ${isPass ? 'pass' : 'fail'}">${gwa}</span></td>
                 <td class="text-center">
-                    <button class="btn-icon text-danger" onclick="studentToDelete='${s.id}'; openModal('confirm-modal')">
+                    <button class="btn-icon text-danger" onclick="setStudentToDelete('${s.id}')">
                         <i class="fa-solid fa-trash"></i>
                     </button>
                 </td>
@@ -341,11 +299,10 @@ function updateFilterOptions() {
     $('filter-section').innerHTML = '<option value="">Section</option>' + sections.map(s => `<option value="${s}">${s}</option>`).join('');
 }
 
-// Update your renderSubjectList to include the delete icon
 function renderSubjectList() {
     $('subject-list').innerHTML = subjects.map(s => `
-        <div class="subj-pill-container" style="display:flex; justify-content:space-between; align-items:center;">
-            <div class="subj-pill" style="color:white; font-size:0.8rem; margin-bottom:5px;">• ${s.name}</div>
+        <div class="subj-pill-container" style="display:flex; justify-content:space-between; align-items:center; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 6px; margin-bottom: 5px;">
+            <div class="subj-pill" style="color:white; font-size:0.8rem;">• ${s.name}</div>
             <button class="btn-icon-sm" onclick="deleteSubject('${s.id}')" style="color:rgba(255,255,255,0.5); background:none; border:none; cursor:pointer;">
                 <i class="fa-solid fa-xmark"></i>
             </button>
@@ -376,7 +333,7 @@ function initChart() {
                 y: { 
                     min: 1, 
                     max: 5, 
-                    reverse: true, // 1.0 is top, 5.0 is bottom
+                    reverse: true, 
                     ticks: { stepSize: 1 }
                 } 
             } 

@@ -328,3 +328,54 @@ td { padding: 12px; border-bottom: 1px solid rgba(0,0,0,0.05); text-align: cente
 .sidebar-btn.primary:hover {
     background: #a00000;
 }
+
+/* Align select and buttons in a row */
+.semester-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.side-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+/* Subject Row Styling */
+.subj-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    margin-bottom: 5px;
+    transition: 0.2s;
+}
+
+.subj-row:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.subj-name {
+    color: white;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.delete-subj-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    padding: 2px 5px;
+    transition: 0.2s;
+}
+
+.delete-subj-btn:hover {
+    color: #ff4d4d;
+    transform: scale(1.2);
+}

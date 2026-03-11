@@ -6,6 +6,7 @@
     <title>PCC Grading System</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -15,23 +16,36 @@
     <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="brand"><i class="fa-solid fa-graduation-cap"></i> PCC GRADING</div>
+            <div class="brand">
+                <i class="fa-solid fa-graduation-cap"></i> 
+                <span>PCC GRADING</span>
+            </div>
             <button class="btn-icon" id="close-sidebar"><i class="fa-solid fa-chevron-left"></i></button>
         </div>
+
+        <!-- Semester Selection Section -->
         <div class="menu-section">
             <label class="menu-label">Active Semester</label>
-            <div class="semester-selector">
+            <div class="semester-controls-wrapper">
                 <select id="semester-select" class="glass-input-sm"></select>
-                <button class="btn btn-accent" id="add-semester-btn"><i class="fa-solid fa-plus"></i></button>
-                <button id="delete-semester-btn" onclick="deleteSemester()" class="btn-icon text-danger" title="Delete Current Semester">
-                    <i class="fa-solid fa-trash-can"></i>
-                </button>
+                <div class="semester-actions">
+                    <button class="btn-icon btn-accent" id="add-semester-btn" title="Add New Semester">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                    <button id="delete-semester-btn" onclick="deleteSemester()" class="btn-icon text-danger" title="Delete Selected Semester">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
             </div>
         </div>
+
+        <!-- Subjects Section (Visible only when semester is selected) -->
         <div class="menu-section" id="subjects-section" style="display:none;">
             <label class="menu-label">SUBJECTS <i class="fa-solid fa-book-open"></i></label>
-            <div id="subject-list" class="subject-pills-container"></div>
-            <button class="btn btn-outline btn-sm" id="add-subject-btn" style="margin-top:10px; width:100%;">
+            <div id="subject-list" class="subject-pills-container">
+                <!-- Subject rows with delete buttons injected via app.js -->
+            </div>
+            <button class="btn btn-outline btn-sm sidebar-add-btn" id="add-subject-btn">
                 <i class="fa-solid fa-plus"></i> Add Subject
             </button>
         </div>
@@ -47,7 +61,6 @@
                 <h2>Dashboard</h2>
             </div>
             <div class="header-actions">
-                <!-- Added PDF Export Placeholder -->
                 <button class="btn btn-outline btn-sm hide-mobile" id="export-pdf-btn">
                     <i class="fa-solid fa-file-pdf"></i> Export
                 </button>
@@ -93,7 +106,7 @@
                     </div>
                 </div>
 
-                <!-- ORGANIZED SEARCH & FILTERS -->
+                <!-- SEARCH & FILTERS -->
                 <div class="controls-row">
                     <div class="search-box">
                         <i class="fa-solid fa-magnifying-glass"></i>
@@ -109,7 +122,7 @@
                     </div>
                 </div>
 
-                <!-- TABLE SECTION -->
+                <!-- DATA TABLE -->
                 <div class="table-container">
                     <table id="student-table">
                         <thead><tr id="table-header"></tr></thead>
@@ -120,7 +133,9 @@
         </div>
     </main>
 
-    <!-- MODALS (Keep existing structures but ensure IDs match app.js) -->
+    <!-- MODALS -->
+    
+    <!-- New Semester Modal -->
     <div class="modal-overlay" id="semester-modal">
         <div class="modal">
             <h3>New Semester</h3>
@@ -132,6 +147,7 @@
         </div>
     </div>
 
+    <!-- New Subject Modal -->
     <div class="modal-overlay" id="subject-modal">
         <div class="modal">
             <h3>New Subject</h3>
@@ -143,6 +159,7 @@
         </div>
     </div>
 
+    <!-- Add/Enroll Student Modal -->
     <div class="modal-overlay" id="student-modal">
         <div class="modal">
             <h3>Enroll Student</h3>
@@ -160,11 +177,15 @@
         </div>
     </div>
 
+    <!-- Edit Student Modal -->
     <div class="modal-overlay" id="edit-modal">
         <div class="modal">
             <div class="modal-header">
                 <h3>Edit Record</h3>
-                <button class="btn-icon text-danger" id="delete-student-btn"><i class="fa-solid fa-trash-can"></i></button>
+                <!-- Student delete handled via the confirm modal logic -->
+                <button class="btn-icon text-danger" id="delete-student-btn" onclick="openModal('confirm-modal')">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
             </div>
             <input type="hidden" id="edit-student-id">
             <input type="text" id="edit-student-name" class="glass-input mb-10">
@@ -180,13 +201,15 @@
         </div>
     </div>
 
+    <!-- Confirmation Modal (Generic for deletion) -->
     <div class="modal-overlay" id="confirm-modal">
         <div class="modal text-center">
-            <i class="fa-solid fa-triangle-exclamation text-danger" style="font-size: 2rem;"></i>
-            <h3>Delete Record?</h3>
-            <p>Are you sure? This cannot be undone.</p>
+            <div class="warn-icon">
+                <i class="fa-solid fa-triangle-exclamation text-danger"></i>
+            </div>
+            <h3>Confirm Delete</h3>
+            <p>Are you sure you want to remove this record? This action is permanent and will delete all associated data.</p>
             <div class="modal-footer flex-center">
-<!-- Inside your confirm-modal -->
                 <button id="confirm-delete-btn" class="btn btn-danger" onclick="executeDelete()">Yes, Delete</button>
                 <button class="btn btn-text" data-close="confirm-modal">No, Keep</button>
             </div>
