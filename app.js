@@ -18,46 +18,59 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function bindEvents() {
-    $('mobile-menu-btn').onclick = () => {
-        $('sidebar').classList.add('open');
-        $('sidebar-overlay').style.display = 'block';
+    // SINGLE TOGGLE FUNCTION FOR ALL DEVICES
+    const toggleSidebar = () => {
+        const sidebar = $('sidebar');
+        const overlay = $('sidebar-overlay');
+        
+        if (window.innerWidth > 1024) {
+            // DESKTOP: Toggle 'collapsed'
+            sidebar.classList.toggle('collapsed');
+        } else {
+            // MOBILE: Toggle 'open'
+            sidebar.classList.toggle('open');
+            overlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
+        }
     };
 
-    const closeSidebar = () => {
-        $('sidebar').classList.remove('open');
-        $('sidebar-overlay').style.display = 'none';
-    };
+    // All triggers
+    $('mobile-menu-btn').onclick = toggleSidebar;
+    $('close-sidebar').onclick = toggleSidebar;
+    $('sidebar-overlay').onclick = toggleSidebar;
 
-    $('close-sidebar').onclick = closeSidebar;
-    $('sidebar-overlay').onclick = closeSidebar;
-
+    // Close sidebar on mobile when a semester is picked
     $('semester-select').onchange = (e) => {
         currentSemesterId = e.target.value;
         localStorage.setItem('selectedSemesterId', currentSemesterId || '');
         loadDashboard();
-        if(window.innerWidth <= 1024) closeSidebar();
+        
+        if(window.innerWidth <= 1024) {
+            $('sidebar').classList.remove('open');
+            $('sidebar-overlay').style.display = 'none';
+        }
     };
 
+    // Standard Buttons
     $('add-semester-btn').onclick = () => openModal('semester-modal');
     $('add-subject-btn').onclick = () => openModal('subject-modal');
     $('add-student-btn').onclick = openAddStudentModal;
-
     $('save-semester-btn').onclick = addSemester;
     $('save-subject-btn').onclick = addSubject;
     $('save-student-btn').onclick = saveStudent;
     $('update-student-btn').onclick = updateStudent;
     $('confirm-delete-btn').onclick = executeDelete;
 
+    // Filters
     $('search-input').oninput = renderTable;
     $('filter-year').onchange = renderTable;
     $('filter-section').onchange = renderTable;
 
+    // Modal Close Logic
     document.addEventListener('click', (e) => {
         if (e.target.dataset.close) closeModal(e.target.dataset.close);
         if (e.target.classList.contains('modal-overlay')) closeModal(e.target.id);
     });
 }
-
 // --- DATA FETCHING ---
 async function loadSemesters() {
     const { data } = await db.from('semesters2').select('*').order('created_at', { ascending: false });
