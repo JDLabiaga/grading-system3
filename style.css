@@ -379,3 +379,46 @@ td { padding: 12px; border-bottom: 1px solid rgba(0,0,0,0.05); text-align: cente
     color: #ff4d4d;
     transform: scale(1.2);
 }
+
+/* Sidebar Default State (PC) */
+.sidebar {
+    width: 260px;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+/* Sidebar Collapsed State (PC) */
+.sidebar.collapsed {
+    width: 0;
+    padding: 0;
+    overflow: hidden;
+    margin-left: -260px; /* Slide out of view */
+}
+
+/* Main Content Adjustment */
+.main-content {
+    margin-left: 260px; /* Match sidebar width */
+    width: calc(100% - 260px);
+    transition: all 0.3s ease;
+}
+
+/* When sidebar is collapsed, main content takes full width */
+.sidebar.collapsed + .main-content {
+    margin-left: 0;
+    width: 100%;
+}
+
+/* Mobile Overrides (Keep your existing mobile logic) */
+@media (max-width: 1024px) {
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+    .sidebar {
+        margin-left: -260px; /* Hidden by default on mobile */
+    }
+    .sidebar.open {
+        margin-left: 0;
+        width: 260px;
+    }
+}
