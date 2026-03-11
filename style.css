@@ -1,3 +1,4 @@
+/* RESTORING YOUR ORIGINAL ROOT & THEME */
 :root {
     --primary: #800000;
     --primary-dark: #5c0000;
@@ -17,7 +18,7 @@
     --font: 'Inter', sans-serif;
 }
 
-/* 1. ANIMATED GLASS BACKGROUND */
+/* KEEPING YOUR BACKGROUND ANIMATION */
 @keyframes gradientBG {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
@@ -32,166 +33,97 @@ body {
     background-size: 400% 400%;
     animation: gradientBG 15s ease infinite;
     min-height: 100vh;
-    display: flex;
 }
 
-/* 2. SIDEBAR - MODERN DARK */
+/* SIDEBAR - RESTORED */
 .sidebar {
     width: var(--sidebar-width);
-    background: #0f172a; /* Deep Navy Professional */
+    background: linear-gradient(180deg,#17223b 0%, #19273f 100%);
     color: var(--white);
     position: fixed;
     height: 100vh;
     z-index: 1200;
-    transition: transform var(--transition), width var(--transition);
+    transition: transform var(--transition);
     padding: 20px 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
     box-sizing: border-box;
 }
 
-.sidebar.collapsed {
-    transform: translateX(-100%);
-}
-
-/* 3. SELECT DROPDOWN FIX (Invisible text fix) */
+/* THE FIX: PREVENT WHITE TEXT ON WHITE BACKGROUND IN DROPDOWN */
 #semester-select {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.2);
     color: white;
-    padding: 12px;
+    padding: 10px;
     border-radius: 8px;
     width: 100%;
-    cursor: pointer;
 }
 
-/* This forces the dropdown options to be visible */
 #semester-select option {
-    background-color: white !important;
-    color: #1a1a2e !important;
-    padding: 10px;
+    background-color: #ffffff !important; /* Force background to white */
+    color: #1a1a2e !important;            /* Force text to dark navy */
 }
 
-/* 4. MAIN CONTENT */
+/* MAIN CONTENT - RESTORED */
 .main-content {
     margin-left: var(--sidebar-width);
-    flex: 1;
-    width: calc(100% - var(--sidebar-width));
-    transition: margin-left var(--transition), width var(--transition);
-    min-height: 100vh;
+    padding: 20px;
 }
 
-.sidebar.collapsed + .main-content {
-    margin-left: 0;
-    width: 100%;
-}
-
-/* 5. TOP BAR & CONTROLS */
-.top-bar {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid #e2e8f0;
-    padding: 15px 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-.controls-row {
-    display: flex;
-    gap: 15px;
-    margin: 20px;
+/* TABLE - RESTORED TO YOUR PREVIOUS DESIGN */
+.table-container {
     background: var(--glass-bg);
-    padding: 15px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--glass-border);
     backdrop-filter: blur(10px);
-}
-
-#search-input {
-    padding: 10px 10px 10px 35px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    width: 100%;
-}
-
-/* 6. EMPTY STATE (Glassmorphism) */
-.empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    height: 60vh;
-    padding: 40px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(15px);
-    border-radius: 24px;
+    border-radius: var(--radius);
     border: 1px solid var(--glass-border);
+    overflow-x: auto;
     box-shadow: var(--shadow);
-    max-width: 500px;
-    margin: 50px auto;
 }
 
-.empty-icon-box {
-    width: 70px;
-    height: 70px;
-    background: var(--primary);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 18px;
-    font-size: 1.5rem;
-    margin-bottom: 20px;
-    box-shadow: 0 8px 15px rgba(128, 0, 0, 0.3);
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    min-width: 800px; 
 }
 
-/* 7. MODALS */
+th { 
+    background: var(--primary); 
+    color: white; 
+    padding: 15px; 
+    font-size: 0.85rem; 
+    text-transform: uppercase;
+}
+
+td { 
+    padding: 15px; 
+    border-bottom: 1px solid rgba(0,0,0,0.05); 
+    text-align: center;
+    background: rgba(255,255,255,0.3);
+}
+
+/* MODALS - RESTORED */
 .modal-overlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(4px);
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(5px);
     align-items: center;
     justify-content: center;
     z-index: 3000;
 }
-
 .modal-overlay.active { display: flex; }
-
 .modal {
     background: white;
     padding: 2rem;
     border-radius: var(--radius);
-    width: 95%;
-    max-width: 450px;
+    width: 90%;
+    max-width: 500px;
     box-shadow: var(--shadow);
 }
 
-/* 8. SUBJECT ROWS (Sidebar) */
-.subj-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 8px;
-    margin-bottom: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.subj-name { font-size: 0.9rem; font-weight: 500; }
-
-/* 9. MOBILE RESPONSIVENESS */
+/* MOBILE RESPONSIVENESS */
 @media (max-width: 1024px) {
     .sidebar { transform: translateX(-100%); }
     .sidebar.open { transform: translateX(0); }
-    .main-content { margin-left: 0; width: 100%; }
-    .controls-row { flex-direction: column; }
+    .main-content { margin-left: 0; }
 }
