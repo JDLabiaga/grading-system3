@@ -21,13 +21,12 @@ function bindEvents() {
     // Mobile Sidebar Toggle
     $('mobile-menu-btn').onclick = () => {
         $('sidebar').classList.add('open');
-        $('sidebar-overlay').classList.add('active');
+        $('sidebar-overlay').style.display = 'block';
     };
 
-    // Close Sidebar
     const closeSidebar = () => {
         $('sidebar').classList.remove('open');
-        $('sidebar-overlay').classList.remove('active');
+        $('sidebar-overlay').style.display = 'none';
     };
 
     $('close-sidebar').onclick = closeSidebar;
@@ -58,7 +57,7 @@ function bindEvents() {
     $('filter-year').onchange = renderTable;
     $('filter-section').onchange = renderTable;
 
-    // Global Closer for Modals (matches data-close in your HTML)
+    // Global Modal Closer
     document.addEventListener('click', (e) => {
         if (e.target.dataset.close) closeModal(e.target.dataset.close);
         if (e.target.classList.contains('modal-overlay')) closeModal(e.target.id);
@@ -92,21 +91,18 @@ async function loadDashboard() {
     
     $('empty-state').style.display = 'none';
     $('subjects-section').style.display = 'block';
-    $('add-student-btn').style.display = 'inline-flex';
 
     const { data: subData } = await db.from('subjects2').select('*').eq('semester_id', currentSemesterId);
     subjects = subData || [];
     renderSubjectList();
     
-    if (subjects.length === 0) {
-        $('no-subjects-state').style.display = 'flex';
-        $('table-section').style.display = 'none';
-        $('add-student-btn').style.display = 'none';
-    } else {
-        $('no-subjects-state').style.display = 'none';
+    if (subjects.length > 0) {
         $('table-section').style.display = 'block';
         $('add-student-btn').style.display = 'inline-flex';
         await loadStudents();
+    } else {
+        $('table-section').style.display = 'none';
+        $('add-student-btn').style.display = 'none';
     }
 }
 
@@ -118,8 +114,7 @@ async function loadStudents() {
         return;
     }
 
-    const ids = studentList.map(s => s.id);
-    const { data: gradeData } = await db.from('grades2').select('*').in('student_id', ids);
+    const { data: gradeData } = await db.from('grades2').select('*').in('student_id', studentList.map(s => s.id));
 
     students = studentList.map(s => ({
         ...s,
@@ -130,14 +125,14 @@ async function loadStudents() {
     renderTable();
 }
 
-// --- STUDENT MODAL LOGIC (ADD/EDIT/DELETE) ---
+// --- STUDENT LOGIC ---
 
 function openAddStudentModal() {
     const container = $('grade-inputs');
     container.innerHTML = subjects.map(sub => `
-        <div class="input-group">
+        <div class="input-group" style="margin-bottom:10px;">
             <label style="font-size:0.75rem; color:var(--primary);">${sub.name}</label>
-            <input type="number" class="subject-grade-input glass-input-table" data-subject-id="${sub.id}" placeholder="0.0">
+            <input type="number" class="subject-grade-input glass-input-table" data-subject-id="${sub.id}" placeholder="Enter Grade" style="width:100%">
         </div>
     `).join('');
     openModal('student-modal');
@@ -148,29 +143,25 @@ async function saveStudent() {
     if (!name) return showToast('Name is required', 'danger');
 
     const { data: student } = await db.from('students2').insert([{ 
-        full_name: name, 
-        semester_id: currentSemesterId,
-        year_level: $('new-student-year').value,
-        section: $('new-student-section').value
+        full_name: name, semester_id: currentSemesterId,
+        year_level: $('new-student-year').value, section: $('new-student-section').value
     }]).select().single();
 
     if (student) {
         const inputs = document.querySelectorAll('.subject-grade-input');
         const grades = Array.from(inputs).map(i => ({
-            student_id: student.id,
-            subject_id: i.dataset.subjectId,
+            student_id: student.id, subject_id: i.dataset.subjectId,
             score: i.value === '' ? null : parseFloat(i.value)
         })).filter(g => g.score !== null);
 
         if (grades.length > 0) await db.from('grades2').insert(grades);
         
         closeModal('student-modal');
-        showToast('Student added', 'success');
+        showToast('Student Added', 'success');
         loadStudents();
     }
 }
 
-// THE 3-DOTS ACTION
 function openEditModal(id) {
     const s = students.find(stud => stud.id === id);
     if (!s) return;
@@ -180,22 +171,16 @@ function openEditModal(id) {
     $('edit-student-year').value = s.year_level || '';
     $('edit-student-section').value = s.section || '';
 
-    const container = $('edit-grade-inputs');
-    container.innerHTML = subjects.map(sub => {
+    $('edit-grade-inputs').innerHTML = subjects.map(sub => {
         const grade = s.grades.find(g => g.subject_id === sub.id);
         return `
-            <div class="input-group">
+            <div class="input-group" style="margin-bottom:10px;">
                 <label style="font-size:0.75rem; color:var(--primary);">${sub.name}</label>
-                <input type="number" class="edit-subject-grade-input glass-input-table" data-subject-id="${sub.id}" value="${grade ? grade.score : ''}">
-            </div>
-        `;
+                <input type="number" class="edit-subject-grade-input glass-input-table" data-subject-id="${sub.id}" value="${grade ? grade.score : ''}" style="width:100%">
+            </div>`;
     }).join('');
 
-    $('delete-student-btn').onclick = () => {
-        studentToDelete = s.id;
-        openModal('confirm-modal');
-    };
-
+    studentToDelete = s.id;
     openModal('edit-modal');
 }
 
@@ -211,14 +196,12 @@ async function updateStudent() {
     for (const input of inputs) {
         const score = input.value === '' ? null : parseFloat(input.value);
         await db.from('grades2').upsert({
-            student_id: id,
-            subject_id: input.dataset.subjectId,
-            score: score
+            student_id: id, subject_id: input.dataset.subjectId, score: score
         }, { onConflict: 'student_id,subject_id' });
     }
 
     closeModal('edit-modal');
-    showToast('Updated successfully', 'success');
+    showToast('Updated', 'success');
     loadStudents();
 }
 
@@ -226,7 +209,7 @@ async function executeDelete() {
     await db.from('students2').delete().eq('id', studentToDelete);
     closeModal('confirm-modal');
     closeModal('edit-modal');
-    showToast('Student deleted', 'success');
+    showToast('Deleted', 'success');
     loadStudents();
 }
 
@@ -234,74 +217,62 @@ async function executeDelete() {
 
 function renderTable() {
     const searchTerm = $('search-input').value.toLowerCase();
-    const yearFilter = $('filter-year').value;
-    const secFilter = $('filter-section').value;
+    const year = $('filter-year').value;
+    const sec = $('filter-section').value;
 
-    const filtered = students.filter(s => {
-        return s.full_name.toLowerCase().includes(searchTerm) &&
-               (!yearFilter || s.year_level === yearFilter) &&
-               (!secFilter || s.section === secFilter);
-    });
+    const filtered = students.filter(s => 
+        s.full_name.toLowerCase().includes(searchTerm) &&
+        (!year || s.year_level === year) &&
+        (!sec || s.section === sec)
+    );
 
-    const head = $('table-header');
-    head.innerHTML = '<th>Student Information</th>';
-    subjects.forEach(sub => head.innerHTML += `<th class="text-center">${sub.name}</th>`);
-    head.innerHTML += '<th class="text-center">GWA</th><th></th>';
+    $('table-header').innerHTML = '<th>Student Information</th>' + 
+        subjects.map(sub => `<th class="text-center">${sub.name}</th>`).join('') + 
+        '<th>GWA</th><th></th>';
 
-    const body = $('table-body');
-    body.innerHTML = filtered.map(s => {
-        let total = 0, count = 0;
-        const gradeCells = subjects.map(sub => {
+    $('table-body').innerHTML = filtered.map(s => {
+        let sum = 0, count = 0;
+        const cells = subjects.map(sub => {
             const g = s.grades.find(g => g.subject_id === sub.id);
             const val = (g && g.score !== null) ? g.score : '-';
-            if (val !== '-') { total += parseFloat(val); count++; }
+            if (val !== '-') { sum += parseFloat(val); count++; }
             return `<td class="text-center">${val}</td>`;
         }).join('');
 
-        const gwa = count > 0 ? (total / count).toFixed(2) : '0.00';
+        const gwa = count > 0 ? (sum / count).toFixed(2) : '0.00';
         return `
             <tr>
-                <td>
-                    <div style="display:flex; flex-direction:column;">
-                        <strong>${s.full_name}</strong>
-                        <small style="color:var(--text-light)">${s.year_level || ''} ${s.section || ''}</small>
-                    </div>
-                </td>
-                ${gradeCells}
-                <td class="text-center"><span class="badge ${parseFloat(gwa) >= 75 || parseFloat(gwa) <= 3.0 ? 'pass' : 'fail'}">${gwa}</span></td>
-                <td class="text-center">
-                    <button class="btn-icon" onclick="openEditModal('${s.id}')">
-                        <i class="fa-solid fa-ellipsis-vertical"></i>
-                    </button>
-                </td>
-            </tr>
-        `;
+                <td><strong>${s.full_name}</strong><br><small>${s.year_level || ''} ${s.section || ''}</small></td>
+                ${cells}
+                <td class="text-center"><span class="badge ${parseFloat(gwa) >= 75 || (parseFloat(gwa) <= 3.0 && parseFloat(gwa) > 0) ? 'pass' : 'fail'}">${gwa}</span></td>
+                <td class="text-center"><button class="btn-icon" onclick="openEditModal('${s.id}')"><i class="fa-solid fa-ellipsis-vertical"></i></button></td>
+            </tr>`;
     }).join('');
 
     updateStats(filtered);
 }
 
-// --- HELPER FUNCTIONS ---
-
 function updateStats(data) {
     const total = data.length;
     $('stat-total-students').textContent = total;
     
-    let allSum = 0, allCount = 0, passCount = 0;
+    let allSum = 0, allCount = 0, passing = 0;
     data.forEach(s => {
         let sSum = 0, sCount = 0;
         s.grades.forEach(g => { if(g.score) { allSum += g.score; allCount++; sSum += g.score; sCount++; } });
-        if(sCount > 0 && (sSum/sCount) >= 75) passCount++;
+        if(sCount > 0 && (sSum/sCount) >= 75) passing++;
     });
 
     $('stat-average-class').textContent = allCount ? (allSum / allCount).toFixed(1) : '0.0';
-    $('stat-pass-rate').textContent = total ? Math.round((passCount / total) * 100) + '%' : '0%';
+    $('stat-pass-rate').textContent = total ? Math.round((passing / total) * 100) + '%' : '0%';
     
     updateChart(subjects.map(s => s.name), subjects.map(sub => {
         const subGrades = data.flatMap(s => s.grades).filter(g => g.subject_id === sub.id && g.score);
         return subGrades.length ? (subGrades.reduce((a,b) => a + b.score, 0) / subGrades.length).toFixed(1) : 0;
     }));
 }
+
+// --- UTILS ---
 
 async function addSemester() {
     const name = $('semester-name').value.trim();
@@ -331,7 +302,7 @@ function updateFilterOptions() {
 }
 
 function renderSubjectList() {
-    $('subject-list').innerHTML = subjects.map(s => `<div class="subj-pill" style="background:rgba(255,255,255,0.1); padding:5px 10px; border-radius:15px; margin-bottom:5px; font-size:0.8rem;">${s.name}</div>`).join('');
+    $('subject-list').innerHTML = subjects.map(s => `<div class="subj-pill" style="color:white; font-size:0.8rem; margin-bottom:5px;">• ${s.name}</div>`).join('');
 }
 
 function openModal(id) { $(id).classList.add('active'); }

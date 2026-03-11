@@ -55,7 +55,7 @@
                 <div class="dashboard-grid">
                     <div class="card chart-card">
                         <div class="card-header"><h3>Subject Averages</h3></div>
-                        <div class="card-body"><canvas id="dashboard-chart"></canvas></div>
+                        <div class="card-body" style="position: relative; height:200px;"><canvas id="dashboard-chart"></canvas></div>
                     </div>
                     <div class="card stats-card">
                         <div class="card-header"><h3>Class Summary</h3></div>
@@ -75,8 +75,8 @@
                         </div>
                     </div>
                     <div class="table-filters">
-                        <select id="filter-year" class="filter-select"><option value="">Year Level</option></select>
-                        <select id="filter-section" class="filter-select"><option value="">Section</option></select>
+                        <select id="filter-year" class="filter-select"></select>
+                        <select id="filter-section" class="filter-select"></select>
                     </div>
                 </div>
 
@@ -90,20 +90,79 @@
         </div>
     </main>
 
-    <!-- Modals (Hidden by default) -->
+    <!-- SEMESTER MODAL -->
     <div class="modal-overlay" id="semester-modal">
         <div class="modal">
             <h3>Add New Semester</h3>
             <input type="text" id="semester-name" placeholder="e.g. 1st Semester 2026">
-            <div style="margin-top:20px; display:flex; gap:10px;">
+            <div class="modal-footer" style="margin-top:20px; display:flex; gap:10px;">
                 <button class="btn btn-primary" id="save-semester-btn">Save</button>
                 <button class="btn btn-outline" data-close="semester-modal">Cancel</button>
             </div>
         </div>
     </div>
 
-    <!-- Other modals (Subject, Student, Edit, Confirm) follow same pattern -->
-    <!-- ... [Rest of your modal code here] ... -->
+    <!-- SUBJECT MODAL -->
+    <div class="modal-overlay" id="subject-modal">
+        <div class="modal">
+            <h3>Add New Subject</h3>
+            <input type="text" id="new-subject-name" placeholder="Subject Name">
+            <div class="modal-footer" style="margin-top:20px; display:flex; gap:10px;">
+                <button class="btn btn-primary" id="save-subject-btn">Save</button>
+                <button class="btn btn-outline" data-close="subject-modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STUDENT MODAL (ADD) -->
+    <div class="modal-overlay" id="student-modal">
+        <div class="modal">
+            <h3>Enroll New Student</h3>
+            <div class="input-group"><input type="text" id="new-student-name" placeholder="Full Name"></div>
+            <div style="display:flex; gap:10px; margin: 10px 0;">
+                <input type="text" id="new-student-year" placeholder="Year (e.g. 4th)">
+                <input type="text" id="new-student-section" placeholder="Section (e.g. A)">
+            </div>
+            <div id="grade-inputs" style="max-height: 200px; overflow-y: auto; margin-top:10px;"></div>
+            <div class="modal-footer" style="margin-top:20px; display:flex; gap:10px;">
+                <button class="btn btn-primary" id="save-student-btn">Save Student</button>
+                <button class="btn btn-outline" data-close="student-modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT MODAL -->
+    <div class="modal-overlay" id="edit-modal">
+        <div class="modal">
+            <div style="display:flex; justify-content: space-between;">
+                <h3>Edit Student Record</h3>
+                <button class="btn btn-danger btn-sm" id="delete-student-btn"><i class="fa-solid fa-trash"></i></button>
+            </div>
+            <input type="hidden" id="edit-student-id">
+            <div class="input-group"><input type="text" id="edit-student-name"></div>
+            <div style="display:flex; gap:10px; margin: 10px 0;">
+                <input type="text" id="edit-student-year">
+                <input type="text" id="edit-student-section">
+            </div>
+            <div id="edit-grade-inputs" style="max-height: 200px; overflow-y: auto;"></div>
+            <div class="modal-footer" style="margin-top:20px; display:flex; gap:10px;">
+                <button class="btn btn-primary" id="update-student-btn">Update Record</button>
+                <button class="btn btn-outline" data-close="edit-modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONFIRM DELETE MODAL -->
+    <div class="modal-overlay" id="confirm-modal">
+        <div class="modal" style="max-width:300px; text-align:center;">
+            <h3>Delete Student?</h3>
+            <p>This action cannot be undone.</p>
+            <div style="margin-top:20px; display:flex; justify-content:center; gap:10px;">
+                <button class="btn btn-danger" id="confirm-delete-btn">Delete</button>
+                <button class="btn btn-outline" data-close="confirm-modal">Cancel</button>
+            </div>
+        </div>
+    </div>
 
     <script src="app.js"></script>
 </body>
