@@ -225,3 +225,106 @@ td { padding: 12px; border-bottom: 1px solid rgba(0,0,0,0.05); text-align: cente
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
 }
+/* MODERN SIDEBAR DESIGN */
+#sidebar {
+    background: #0f172a; /* Deep Navy Professional Look */
+    color: #f8fafc;
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar-header {
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 10px;
+}
+
+.sidebar-header h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Styled Semester Select Container */
+.semester-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+#semester-select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    flex-grow: 1;
+    outline: none;
+    transition: all 0.3s;
+}
+
+#semester-select:focus {
+    border-color: #38bdf8;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Subject Pills Section */
+.subjects-section-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #94a3b8;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.subj-pill-container {
+    background: rgba(255, 255, 255, 0.03);
+    margin-bottom: 6px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.subj-pill-container:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.subj-pill-container .btn-icon-sm:hover {
+    color: #ef4444 !important;
+}
+
+/* Action Buttons in Sidebar */
+.sidebar-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    background: #1e293b;
+    color: white;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.sidebar-btn:hover {
+    background: #334155;
+}
+
+.sidebar-btn.primary {
+    background: #800000; /* Matching your maroon theme */
+}
+
+.sidebar-btn.primary:hover {
+    background: #a00000;
+}

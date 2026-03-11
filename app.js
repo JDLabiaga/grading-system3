@@ -217,6 +217,35 @@ async function executeDelete() {
     }
 }
 
+// DELETE SUBJECT
+async function deleteSubject(subjectId) {
+    if (!confirm("Delete this subject and all associated grades?")) return;
+    
+    const { error } = await db.from('subjects2').delete().eq('id', subjectId);
+    if (error) {
+        showToast("Error deleting subject", "danger");
+    } else {
+        showToast("Subject deleted", "success");
+        loadDashboard(); // Refresh UI
+    }
+}
+
+// DELETE SEMESTER
+async function deleteSemester() {
+    if (!currentSemesterId) return;
+    const name = $("semester-select").options[$("semester-select").selectedIndex].text;
+    
+    if (!confirm(`Are you sure? This will permanently delete the semester "${name}" and ALL students/grades inside it.`)) return;
+
+    const { error } = await db.from('semesters2').delete().eq('id', currentSemesterId);
+    if (error) {
+        showToast("Error deleting semester", "danger");
+    } else {
+        showToast("Semester deleted", "success");
+        localStorage.removeItem('selectedSemesterId');
+        location.reload(); // Refresh to clear everything
+    }
+}
 // --- Replace your renderTable function to ensure the button works ---
 function renderTable() {
     const searchTerm = $('search-input').value.toLowerCase();
@@ -228,6 +257,7 @@ function renderTable() {
         (!year || s.year_level === year) &&
         (!sec || s.section === sec)
     );
+
 
     // Update Header
     $('table-header').innerHTML = '<th>Student Information</th>' + 
@@ -311,8 +341,16 @@ function updateFilterOptions() {
     $('filter-section').innerHTML = '<option value="">Section</option>' + sections.map(s => `<option value="${s}">${s}</option>`).join('');
 }
 
+// Update your renderSubjectList to include the delete icon
 function renderSubjectList() {
-    $('subject-list').innerHTML = subjects.map(s => `<div class="subj-pill" style="color:white; font-size:0.8rem; margin-bottom:5px;">• ${s.name}</div>`).join('');
+    $('subject-list').innerHTML = subjects.map(s => `
+        <div class="subj-pill-container" style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="subj-pill" style="color:white; font-size:0.8rem; margin-bottom:5px;">• ${s.name}</div>
+            <button class="btn-icon-sm" onclick="deleteSubject('${s.id}')" style="color:rgba(255,255,255,0.5); background:none; border:none; cursor:pointer;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    `).join('');
 }
 
 function openModal(id) { $(id).classList.add('active'); }
